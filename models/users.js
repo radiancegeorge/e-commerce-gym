@@ -33,5 +33,3 @@ const users = (sequelize, dataTypes) => {
 };
 
 module.exports = users;
-
-//test
