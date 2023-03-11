@@ -20,7 +20,7 @@ const users = (sequelize, dataTypes) => {
       unique: true,
     },
     password: {
-      type: dataType.STRING,
+      type: dataTypes.STRING,
       allowNull: false,
     },
   });

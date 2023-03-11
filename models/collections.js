@@ -8,7 +8,7 @@ const { Sequelize, DataTypes } = require("sequelize");
 const collections = (sequelize, dataTypes) => {
   const collections = sequelize.define("collections", {
     name: {
-      type: dataType.STRING,
+      type: dataTypes.STRING,
       allowNull: false,
     },
   });
