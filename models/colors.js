@@ -14,6 +14,7 @@ const colors = (sequelize, dataTypes) => {
   colors.associate = (models) => {
     colors.belongsToMany(models.products, { through: "productColors" });
   };
+
   return colors;
 };
 

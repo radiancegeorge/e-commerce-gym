@@ -25,6 +25,7 @@ const coupons = (sequelize, dataType) => {
 
   coupons.associate = (models) => {
     coupons.hasMany(models.orders);
+    coupons.hasMany(models.products);
   };
 
   return coupons;

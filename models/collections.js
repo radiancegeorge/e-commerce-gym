@@ -11,6 +11,14 @@ const collections = (sequelize, dataTypes) => {
       type: dataTypes.STRING,
       allowNull: false,
     },
+    header1: {
+      type: dataTypes.STRING,
+      allowNull: true,
+    },
+    header2: {
+      type: dataTypes.STRING,
+      allowNull: true,
+    },
   });
 
   collections.associate = (models) => {
