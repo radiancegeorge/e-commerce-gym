@@ -19,16 +19,16 @@ exports.updateCategory = asyncHandler(async (req, res) => {
       },
     }
   );
-  res.send(200);
+  res.status(200).send();
 });
 
 exports.deleteCategory = asyncHandler(async (req, res) => {
-  const { id } = req.body;
+  const { id } = req.params;
   await db.categories.destroy({
     where: {
       id,
     },
   });
 
-  res.send(204);
+  res.status(204).send();
 });

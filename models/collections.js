@@ -10,6 +10,7 @@ const collections = (sequelize, dataTypes) => {
     name: {
       type: dataTypes.STRING,
       allowNull: false,
+      unique: "collectionName",
     },
     header1: {
       type: dataTypes.STRING,

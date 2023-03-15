@@ -24,7 +24,10 @@ const admin = (sequelize, dataTypes) => {
    * @param {string} password
    */
   admin.createAccount = async (email, password) => {
-    const hashedPassword = await bcrypt.hash(password, process.env.SALT ?? 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      Number(process.env.SALT) ?? 10
+    );
     const newAdmin = await admin.create({
       email,
       password: hashedPassword,
@@ -49,7 +52,7 @@ const admin = (sequelize, dataTypes) => {
    *
    * @param {string} password
    */
-  admin.prototype.testPassword = async (password) => {
+  admin.prototype.testPassword = async function (password) {
     return await bcrypt.compare(password, this.password);
   };
 
