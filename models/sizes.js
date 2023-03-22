@@ -10,6 +10,7 @@ const sizes = (sequelize, dataTypes) => {
     name: {
       type: dataTypes.STRING,
       allowNull: false,
+      unique: "name",
     },
   });
   return sizes;

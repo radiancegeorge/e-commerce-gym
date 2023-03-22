@@ -2,32 +2,27 @@ const asyncHandler = require("express-async-handler");
 const db = require("../../../models");
 const checkValidation = require("../../middlewares/checkValidation");
 
-exports.createSizes = asyncHandler(async (req, res) => {
+exports.createFaq = asyncHandler(async (req, res) => {
   await checkValidation(req);
-  const { name } = req.body;
-  const newSizes = await db.sizes.create({ name });
-  res.status(201).send(newSizes);
+  const newFaq = await db.faq.create(req.body);
+  res.status(201).send(newFaq);
 });
 
-exports.updateSizes = asyncHandler(async (req, res) => {
+exports.updateFaq = asyncHandler(async (req, res) => {
   await checkValidation(req);
-  const { name } = req.body;
   const { id } = req.params;
-  await db.sizes.update(
-    { name },
-    {
-      where: {
-        id,
-      },
-    }
-  );
+  await db.faq.update(req.body, {
+    where: {
+      id,
+    },
+  });
   res.status(200).send();
 });
 
-exports.deleteSizes = asyncHandler(async (req, res) => {
+exports.deleteFaq = asyncHandler(async (req, res) => {
   await checkValidation(req);
   const { id } = req.params;
-  await db.sizes.destroy({
+  await db.faq.destroy({
     where: {
       id,
     },
@@ -36,20 +31,20 @@ exports.deleteSizes = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-exports.getSizes = asyncHandler(async (req, res) => {
+exports.getFaq = asyncHandler(async (req, res) => {
   await checkValidation(req);
   const { limit, page } = req.query;
   const offset = (page - 1) * limit;
-  const [sizes, count] = await Promise.all([
-    await db.sizes.findAll({
+  const [faqs, count] = await Promise.all([
+    await db.faq.findAll({
       limit,
       offset,
     }),
-    await db.sizes.count(),
+    await db.faq.count(),
   ]);
 
   res.send({
-    results: sizes,
+    results: faqs,
     page,
     totalPages: Math.ceil(count / limit),
     count,

@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../../../models");
+const checkValidation = require("../../middlewares/checkValidation");
 
 exports.createCategory = asyncHandler(async (req, res) => {
   const newCategory = await db.categories.create(req.body);
@@ -31,4 +32,24 @@ exports.deleteCategory = asyncHandler(async (req, res) => {
   });
 
   res.status(204).send();
+});
+
+exports.getCategories = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { limit, page } = req.query;
+  const offset = (page - 1) * limit;
+  const [categories, count] = await Promise.all([
+    await db.categories.findAll({
+      limit,
+      offset,
+    }),
+    await db.categories.count(),
+  ]);
+
+  res.send({
+    results: categories,
+    page,
+    totalPages: Math.ceil(count / limit),
+    count,
+  });
 });

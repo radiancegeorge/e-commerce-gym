@@ -32,3 +32,23 @@ exports.deleteCollection = asyncHandler(async (req, res) => {
 
   res.status(204).send();
 });
+
+exports.getCollections = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { limit, page } = req.query;
+  const offset = (page - 1) * limit;
+  const [collections, count] = await Promise.all([
+    await db.collections.findAll({
+      limit,
+      offset,
+    }),
+    await db.collections.count(),
+  ]);
+
+  res.send({
+    results: collections,
+    page,
+    totalPages: Math.ceil(count / limit),
+    count,
+  });
+});

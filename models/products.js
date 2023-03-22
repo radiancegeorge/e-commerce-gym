@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require("sequelize");
+const db = require("./");
 
 /**
  *
@@ -26,6 +27,9 @@ const products = (sequelize, dataTypes) => {
     products.belongsToMany(models.sizes, { through: "productSizes" });
     products.belongsTo(models.collections);
     products.belongsTo(models.categories);
+    products.hasMany(models.images, {
+      onDelete: "cascade",
+    });
   };
 
   return products;

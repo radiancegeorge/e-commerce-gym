@@ -1,33 +1,29 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../../../models");
 const checkValidation = require("../../middlewares/checkValidation");
-
-exports.createSizes = asyncHandler(async (req, res) => {
+const rs = require("randomstring");
+exports.createCoupons = asyncHandler(async (req, res) => {
   await checkValidation(req);
-  const { name } = req.body;
-  const newSizes = await db.sizes.create({ name });
-  res.status(201).send(newSizes);
+  const code = rs.generate(16);
+  const newCoupon = await db.coupons.create({ ...req.body, code });
+  res.status(201).send(newCoupon);
 });
 
-exports.updateSizes = asyncHandler(async (req, res) => {
+exports.updateCoupons = asyncHandler(async (req, res) => {
   await checkValidation(req);
-  const { name } = req.body;
   const { id } = req.params;
-  await db.sizes.update(
-    { name },
-    {
-      where: {
-        id,
-      },
-    }
-  );
+  await db.coupons.update(req.body, {
+    where: {
+      id,
+    },
+  });
   res.status(200).send();
 });
 
-exports.deleteSizes = asyncHandler(async (req, res) => {
+exports.deleteCoupons = asyncHandler(async (req, res) => {
   await checkValidation(req);
   const { id } = req.params;
-  await db.sizes.destroy({
+  await db.coupons.destroy({
     where: {
       id,
     },
@@ -36,20 +32,20 @@ exports.deleteSizes = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-exports.getSizes = asyncHandler(async (req, res) => {
+exports.getCoupons = asyncHandler(async (req, res) => {
   await checkValidation(req);
   const { limit, page } = req.query;
   const offset = (page - 1) * limit;
-  const [sizes, count] = await Promise.all([
-    await db.sizes.findAll({
+  const [coupons, count] = await Promise.all([
+    await db.coupons.findAll({
       limit,
       offset,
     }),
-    await db.sizes.count(),
+    await db.coupons.count(),
   ]);
 
   res.send({
-    results: sizes,
+    results: coupons,
     page,
     totalPages: Math.ceil(count / limit),
     count,
