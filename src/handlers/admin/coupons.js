@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const db = require("../../../models");
 const checkValidation = require("../../middlewares/checkValidation");
 const rs = require("randomstring");
+const { Op } = require("sequelize");
 exports.createCoupons = asyncHandler(async (req, res) => {
   await checkValidation(req);
   const code = rs.generate(16);
@@ -50,4 +51,35 @@ exports.getCoupons = asyncHandler(async (req, res) => {
     totalPages: Math.ceil(count / limit),
     count,
   });
+});
+
+exports.addProducts = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.params;
+  const { productIds } = req.body;
+  const coupon = await db.coupons.findOne({
+    where: {
+      id,
+      expiryDate: {
+        [Op.gte]: new Date(),
+      },
+    },
+  });
+  const data = await coupon.addProducts(productIds);
+  res.send(data);
+});
+exports.removeProducts = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.params;
+  const { productIds } = req.body;
+  const coupon = await db.coupons.findOne({
+    where: {
+      id,
+      expiryDate: {
+        [Op.gte]: new Date(),
+      },
+    },
+  });
+  await coupon.removeProducts(productIds);
+  res.status(204).send();
 });

@@ -80,3 +80,109 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   //
   res.status(204).send();
 });
+
+exports.addColor = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { colorIds } = req.body;
+  const { id } = req.params;
+
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+
+  const addedColors = await product.addColors(colorIds);
+  res.send(addedColors);
+});
+exports.removeColors = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { colorIds } = req.body;
+  const { id } = req.params;
+
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+
+  await product.removeColors(colorIds);
+  res.status(204).send();
+});
+exports.addSizes = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { sizeIds } = req.body;
+  const { id } = req.params;
+
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+
+  const addedSizes = await product.addSizes(sizeIds);
+  res.send(addedSizes);
+});
+exports.removeSizes = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { sizeIds } = req.body;
+  const { id } = req.params;
+
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+  await product.removeSizes(sizeIds);
+  res.status(204).send();
+});
+exports.addCategories = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.params;
+  const { categoryId } = req.body;
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+  const addedCategory = await product.setCategory(categoryId);
+  res.send(addedCategory);
+});
+exports.removeCategories = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.params;
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+
+  product.categoryId = null;
+  await product.save();
+  res.status(204).send();
+});
+exports.addCollection = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.params;
+  const { collectionId } = req.body;
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+  const addedCollection = await product.setCollection(collectionId);
+  res.send(addedCollection);
+});
+exports.removeCollection = asyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.params;
+  const product = await db.products.findOne({
+    where: {
+      id,
+    },
+  });
+
+  product.collectionId = null;
+  await product.save();
+  res.status(204).send();
+});

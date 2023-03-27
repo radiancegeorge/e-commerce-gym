@@ -11,6 +11,11 @@ const orders = (sequelize, dataType) => {
       allowNull: false,
       defaultValue: "pending",
     },
+    quantity: {
+      type: dataType.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
   });
 
   orders.associate = (models) => {

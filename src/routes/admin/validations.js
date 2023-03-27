@@ -17,10 +17,16 @@ exports.colorIdValidation = [param("id").isNumeric()];
 exports.productsCreationValidation = [
   body(["name", "description", "price"]).not().isEmpty(),
 ];
-
 exports.productsIdValidation = [param("id").isNumeric()];
-
 exports.productsPriceUpdateValidation = [body("price").not().isEmpty()];
+exports.productsColorValidation = [
+  body("colorIds").isArray().isLength({ min: 1 }),
+];
+exports.productsSizeValidation = [
+  body("sizeIds").isArray().isLength({ min: 1 }),
+];
+exports.productsCategoriesValidation = [body("categoryId").toInt().isInt()];
+exports.productsCollectionValidation = [body("collectionId").toInt().isInt()];
 
 //coupons
 
@@ -68,3 +74,8 @@ exports.updateFaqValidation = [
 
 //categories
 exports.createCategoriesValidation = [body("name").not().isEmpty()];
+
+//coupons products
+exports.couponsProductValidation = [
+  body("productIds").isArray().isLength({ min: 1 }),
+];

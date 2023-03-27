@@ -21,6 +21,8 @@ const {
   getCoupons,
   updateCoupons,
   deleteCoupons,
+  removeProducts,
+  addProducts,
 } = require("../../handlers/admin/coupons");
 const {
   getFaq,
@@ -32,6 +34,14 @@ const {
   createProduct,
   deleteProduct,
   updateProductPrice,
+  addColor,
+  removeColors,
+  addCategories,
+  removeCategories,
+  removeCollection,
+  addCollection,
+  addSizes,
+  removeSizes,
 } = require("../../handlers/admin/products");
 const {
   getSizes,
@@ -56,6 +66,11 @@ const {
   updateFaqValidation,
   createFaqValidation,
   createCategoriesValidation,
+  productsColorValidation,
+  productsCategoriesValidation,
+  productsCollectionValidation,
+  productsSizeValidation,
+  couponsProductValidation,
 } = require("./validations");
 
 const admin = require("express").Router();
@@ -92,6 +107,11 @@ admin
   .patch(couponIdValidation, couponUpdateValidation, updateCoupons);
 
 admin
+  .route("/coupon/:id/product")
+  .put(couponsProductValidation, colorIdValidation, addProducts)
+  .delete(couponsProductValidation, colorIdValidation, removeProducts);
+
+admin
   .route("/size/:id?")
   .get(allGetListValidation, getSizes)
   .post(createSizesValidation, createSizes)
@@ -110,4 +130,29 @@ admin
   .delete(colorIdValidation, deleteFaq)
   .patch(updateFaqValidation, updateFaq)
   .post(createFaqValidation, createFaq);
+
+//linking products and colors
+admin
+  .route("/product/:id/color")
+  .put(productsColorValidation, colorIdValidation, addColor)
+  .delete(productsColorValidation, colorIdValidation, removeColors);
+
+//linking products and sizes
+admin
+  .route("/product/:id/size")
+  .put(productsSizeValidation, colorIdValidation, addSizes)
+  .delete(productsSizeValidation, colorIdValidation, removeSizes);
+
+//linking products and categories
+
+admin
+  .route("/product/:id/category")
+  .delete(productsIdValidation, removeCategories)
+  .put(productsIdValidation, productsCategoriesValidation, addCategories);
+
+//linking collections
+admin
+  .route("/product/:id/collection")
+  .delete(productsIdValidation, removeCollection)
+  .put(productsIdValidation, productsCollectionValidation, addCollection);
 module.exports = admin;
