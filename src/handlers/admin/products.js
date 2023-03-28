@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const db = require("../../../models");
 const checkValidation = require("../../middlewares/checkValidation");
-const sharp = require("sharp");
+// const sharp = require("sharp");
 const fs = require("fs");
 const rs = require("randomstring");
 
@@ -17,13 +17,34 @@ exports.createProduct = asyncHandler(async (req, res) => {
         //generate name
         const name = data.fieldname + Date.now() + rs.generate(16) + ".jpeg";
         //compress image
-        await sharp(data.buffer)
-          .resize(630)
-          .jpeg({ quality: 50 })
-          .toFile(`./uploads/${name}`);
-        return {
-          url: process.env.SERVER_URL + "/" + name,
-        };
+        if (process.env.HOSTING !== "c-panel") {
+          await sharp(data.buffer)
+            .resize(630)
+            .jpeg({ quality: 50 })
+            .toFile(`./uploads/${name}`);
+          return {
+            url: process.env.SERVER_URL + "/" + name,
+          };
+        } else {
+          return await new Promise((resolve, reject) => {
+            fs.writeFile(
+              `./uploads/${name}`,
+              data.buffer,
+              "binary",
+              function (err) {
+                // Handle any errors
+                if (err) {
+                  console.error(err);
+                  reject(err);
+                } else {
+                  resolve({
+                    url: process.env.SERVER_URL + "/" + name,
+                  });
+                }
+              }
+            );
+          });
+        }
       })
     );
     const newProduct = await db.products.create(
