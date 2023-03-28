@@ -1,3 +1,4 @@
+require("dotenv").config();
 const db = require("./models");
 const app = require("./src/app");
 const port = process.env.PORT;
