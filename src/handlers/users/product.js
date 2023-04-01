@@ -52,6 +52,9 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
           },
         }),
       },
+      {
+        model: db.images,
+      },
     ],
     order: [["ID", "DESC"]],
     limit,
@@ -86,6 +89,9 @@ exports.getSingleProduct = expressAsyncHandler(async (req, res) => {
       },
       {
         model: db.collections,
+      },
+      {
+        model: db.images,
       },
     ],
   });
