@@ -20,6 +20,15 @@ const products = (sequelize, dataTypes) => {
       type: dataTypes.FLOAT,
       allowNull: false,
     },
+    stockAmount: {
+      type: dataTypes.INTEGER,
+      allowNull: false,
+      validate: {
+        isInt: {
+          msg: "Must be a whole number",
+        },
+      },
+    },
   });
 
   products.associate = (models) => {

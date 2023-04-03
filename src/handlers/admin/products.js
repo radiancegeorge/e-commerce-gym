@@ -62,15 +62,12 @@ exports.createProduct = asyncHandler(async (req, res) => {
 exports.updateProductPrice = asyncHandler(async (req, res) => {
   await checkValidation(req);
   const { id } = req.params;
-  const { price } = req.body;
-  const [update] = await db.products.update(
-    { price },
-    {
-      where: {
-        id,
-      },
-    }
-  );
+  // const { price } = req.body;
+  const [update] = await db.products.update(req.body, {
+    where: {
+      id,
+    },
+  });
   update
     ? res.status(200).send(await db.products.findOne({ where: { id } }))
     : res

@@ -5,10 +5,18 @@ const { Op } = require("sequelize");
 
 exports.getProducts = expressAsyncHandler(async (req, res) => {
   await checkValidation(req);
-  const { limit, page, categories, collections, colors, sizes } = req.query;
+  const { limit, page, categories, collections, colors, sizes, sudo } =
+    req.query;
   const offset = (page - 1) * limit;
-  console.log(req.query);
+  console.log(sudo);
   const { count, rows: products } = await db.products.findAndCountAll({
+    ...(!sudo && {
+      where: {
+        stockAmount: {
+          [Op.gt]: 0,
+        },
+      },
+    }),
     include: [
       {
         model: db.colors,

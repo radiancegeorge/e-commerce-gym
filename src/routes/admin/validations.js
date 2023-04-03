@@ -15,10 +15,13 @@ exports.colorIdValidation = [param("id").isNumeric()];
 
 //products
 exports.productsCreationValidation = [
-  body(["name", "description", "price"]).not().isEmpty(),
+  body(["name", "description", "price", "stockAmount"]).not().isEmpty(),
 ];
 exports.productsIdValidation = [param("id").isNumeric()];
-exports.productsPriceUpdateValidation = [body("price").not().isEmpty()];
+exports.productsPriceUpdateValidation = [
+  body("price").optional(),
+  body("stockAmount").optional().isInt(),
+];
 exports.productsColorValidation = [
   body("colorIds").isArray().isLength({ min: 1 }),
 ];

@@ -18,6 +18,21 @@ const users = (sequelize, dataTypes) => {
       type: dataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: {
+          msg: "Field has to be an email",
+        },
+      },
+    },
+    verified: {
+      type: dataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    phoneNumber: {
+      type: dataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     password: {
       type: dataTypes.STRING,
