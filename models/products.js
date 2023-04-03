@@ -35,6 +35,7 @@ const products = (sequelize, dataTypes) => {
     products.belongsToMany(models.colors, { through: "productColors" });
     products.belongsToMany(models.sizes, { through: "productSizes" });
     products.belongsTo(models.collections);
+    products.belongsTo(models.coupons);
     products.belongsTo(models.categories);
     products.hasMany(models.images, {
       onDelete: "cascade",

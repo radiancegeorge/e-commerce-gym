@@ -63,6 +63,9 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
       {
         model: db.images,
       },
+      {
+        model: db.coupons,
+      },
     ],
     order: [["ID", "DESC"]],
     limit,
