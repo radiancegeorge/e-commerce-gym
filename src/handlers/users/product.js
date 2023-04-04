@@ -8,7 +8,7 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
   const { limit, page, categories, collections, colors, sizes, sudo } =
     req.query;
   const offset = (page - 1) * limit;
-  console.log(sudo);
+
   const { count, rows: products } = await db.products.findAndCountAll({
     ...(!sudo && {
       where: {
@@ -108,4 +108,75 @@ exports.getSingleProduct = expressAsyncHandler(async (req, res) => {
   });
 
   res.send(product);
+});
+
+exports.getWishList = expressAsyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { id } = req.user;
+  const { limit, page } = req.query;
+  const offset = (page - 1) * limit;
+  const { count, rows: products } = await db.products.findAndCountAll({
+    include: [
+      {
+        model: db.colors,
+        through: "productColors",
+      },
+      {
+        model: db.coupons,
+      },
+      {
+        model: db.categories,
+      },
+      {
+        model: db.users,
+        through: "usersWishList",
+        where: {
+          id,
+        },
+        attributes: [],
+      },
+    ],
+    offset,
+    limit,
+  });
+
+  res.send({
+    results: products,
+    totalPages: Math.ceil(count / limit),
+    page,
+    limit,
+  });
+});
+
+exports.addToWishList = expressAsyncHandler(async (req, res) => {
+  await checkValidation(req);
+  const { productIds } = req.body;
+  const { id } = req.user;
+  const products = await db.products.findAll({
+    where: {
+      id: {
+        [Op.or]: productIds,
+      },
+    },
+  });
+  for (let product of products) {
+    await product.addUsers(id);
+  }
+  res.send();
+});
+
+exports.removeFromList = expressAsyncHandler(async (req, res) => {
+  const { productIds } = req.body;
+  const { id } = req.user;
+  const products = await db.products.findAll({
+    where: {
+      id: {
+        [Op.or]: productIds,
+      },
+    },
+  });
+  for (x of products) {
+    await x.removeUser(id);
+  }
+  res.status(204).send();
 });

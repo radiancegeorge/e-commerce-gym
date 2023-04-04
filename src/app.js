@@ -9,6 +9,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(route);
 
+//static files from uploads
+app.use("/", express.static("uploads"));
 //error
 app.use(errHandler);
 module.exports = app;

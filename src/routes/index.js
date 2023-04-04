@@ -6,8 +6,10 @@ const {
   reSendVerification,
 } = require("../handlers/users/auth");
 const authenticateToken = require("../middlewares/adminProtect.middleware");
+const authUser = require("../middlewares/userProtect.middleware");
 const admin = require("./admin");
 const unAuth = require("./unAuthenticatedPath");
+const users = require("./users");
 const {
   signUpValidation,
   loginValidation,
@@ -28,5 +30,6 @@ route.use(
   resendVerificationValidation,
   reSendVerification
 );
+route.use("/user", authUser, users);
 
 module.exports = route;

@@ -1,4 +1,4 @@
-const { body, param } = require("express-validator");
+const { body, param, query } = require("express-validator");
 
 exports.signUpValidation = [
   body(["password", "firstName", "lastName", "rePassword", "email"])
@@ -21,3 +21,9 @@ exports.emailVerificationValidation = [param("code").notEmpty()];
 exports.resendVerificationValidation = [
   param("email").trim().notEmpty().isEmail().normalizeEmail(),
 ];
+
+exports.getWishListValidation = [
+  query(["limit", "page"]).default(1).toInt().isInt(),
+];
+
+exports.productIdsValidations = [body("productIds").isArray({ min: 1 })];

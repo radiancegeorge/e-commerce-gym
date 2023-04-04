@@ -34,6 +34,7 @@ const products = (sequelize, dataTypes) => {
   products.associate = (models) => {
     products.belongsToMany(models.colors, { through: "productColors" });
     products.belongsToMany(models.sizes, { through: "productSizes" });
+    products.belongsToMany(models.users, { through: "usersWishList" });
     products.belongsTo(models.collections);
     products.belongsTo(models.coupons);
     products.belongsTo(models.categories);
