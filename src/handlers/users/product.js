@@ -5,10 +5,11 @@ const { Op } = require("sequelize");
 
 exports.getProducts = expressAsyncHandler(async (req, res) => {
   await checkValidation(req);
+  const userId = req.user?.id;
   const { limit, page, categories, collections, colors, sizes, sudo } =
     req.query;
   const offset = (page - 1) * limit;
-
+  console.log(userId);
   const { count, rows: products } = await db.products.findAndCountAll({
     ...(!sudo && {
       where: {
@@ -66,7 +67,16 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
       {
         model: db.coupons,
       },
-    ],
+      userId && {
+        model: db.users,
+        // attributes: [],
+        where: {
+          id: userId,
+        },
+        through: "usersWishList",
+        required: false,
+      },
+    ].filter((item) => item),
     order: [["ID", "DESC"]],
     limit,
     offset,

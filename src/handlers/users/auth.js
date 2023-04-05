@@ -143,14 +143,22 @@ exports.loginUser = expressAsyncHandler(async (req, res) => {
       email,
     },
   });
-  if (!user) res.status(400).send({ msg: "User not found!" });
+  if (!user) {
+    res.status(400).send({ msg: "User not found!" });
+    return;
+  }
 
   const isUser = await bcrypt.compare(password, user.password);
 
-  if (!isUser) res.status(401).send({ msg: "Incorrect Password!" });
+  if (!isUser) {
+    res.status(401).send({ msg: "Incorrect Password!" });
+    return;
+  }
 
-  if (!user.verified)
+  if (!user.verified) {
     res.status(400).send({ msg: "Please Verify email address" });
+    return;
+  }
 
   const token = jwt.sign(
     {

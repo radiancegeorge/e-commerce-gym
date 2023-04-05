@@ -8,6 +8,7 @@ const {
   getProducts,
   getSingleProduct,
 } = require("../../handlers/users/product");
+const partialUserAuth = require("../../middlewares/partialUserAuth.middleware");
 const { allGetListValidation } = require("../admin/validations");
 const { getProductsValidation } = require("./validations");
 
@@ -19,7 +20,9 @@ unAuth.route("/coupon/:id?").get(allGetListValidation, getCoupons);
 unAuth.route("/size/:id?").get(allGetListValidation, getSizes);
 unAuth.route("/category/:id?").get(allGetListValidation, getCategories);
 unAuth.route("/faq/:id?").get(allGetListValidation, getFaq);
-unAuth.route("/product").get(getProductsValidation, getProducts);
-unAuth.route("/product/:id").get(getSingleProduct);
+unAuth
+  .route("/product")
+  .get(partialUserAuth, getProductsValidation, getProducts);
+unAuth.route("/product/:id").get(partialUserAuth, getSingleProduct);
 
 module.exports = unAuth;
