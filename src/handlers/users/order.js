@@ -1,0 +1,151 @@
+const expressAsyncHandler = require("express-async-handler");
+const checkValidation = require("../../middlewares/checkValidation");
+const db = require("../../../models");
+const { Op } = require("sequelize");
+
+exports.createAddress = expressAsyncHandler(async (req, res) => {
+  const data = await checkValidation(req);
+  const { id } = req.user;
+
+  const user = await db.users.findOne({
+    where: { id },
+  });
+  if (!user) throw { status: 400, message: "user not found!" };
+  const newAddress = await user.createDeliveryAddress(data);
+  res.status(201).send(newAddress);
+});
+
+exports.createOrder = expressAsyncHandler(async (req, res) => {
+  const { orders, deliveryAddress, addressId, couponId } =
+    await checkValidation(req);
+  const { id } = req.user;
+
+  const user = await db.users.findOne({
+    where: { id },
+  });
+  /* orders dataType = {
+        productId: number,
+        quantity: number,
+        colorId: number,
+        sizeId: number
+    }[]
+    */
+
+  //get all requested products
+  const { rows: products, count } = await db.products.findAndCountAll({
+    where: {
+      id: {
+        [Op.or]: orders.map((order) => order.productId),
+      },
+      stockAmount: {
+        [Op.gt]: 0,
+      },
+    },
+    include: [
+      {
+        model: db.coupons,
+        where: {
+          expiryDate: {
+            [Op.gt]: new Date(),
+          },
+        },
+        required: false,
+      },
+    ],
+  });
+
+  //check if all product found
+  if (count !== orders.length)
+    throw {
+      status: 400,
+      message: "An error occurred!, invalid product found!",
+    };
+
+  //generate individual total product price and add to order object
+  const orderToBeSaved = Array(orders).map((order) => {
+    const product = products.find(
+      (product) => Number(order.productId) === product.dataValues.id
+    );
+
+    //check for coupons and compute price
+    const percentage = product.coupon?.discount ?? 0;
+    const price =
+      Number(product.price) -
+      (Number(percentage) / 100) * Number(product.price);
+
+    const total = price * Number(order.quantity);
+    return { ...order, total };
+  });
+
+  // generate order total amd add coupon if any provided
+  const { discount, id: coupon } = (await db.coupons.findOne({
+    where: {
+      id: couponId,
+      expiryDate: {
+        [Op.gt]: new Date(),
+      },
+    },
+  })) ?? { discount: 0 };
+
+  const totalPriceFromProducts = orderToBeSaved.reduce(
+    ({ total: prevDataPrice }, { total: currentDataPrice }) => {
+      return prevDataPrice + currentDataPrice;
+    },
+    orderToBeSaved[0]
+  );
+
+  //apply discount if any
+  const total =
+    totalPriceFromProducts - (Number(discount) / 100) * totalPriceFromProducts;
+
+  //create order
+  const t = await db.sequelize.transaction();
+  try {
+    const order = await db.orders.create(
+      {
+        total,
+        ...(coupon && { couponId }),
+        deliveryAddressId: !addressId
+          ? (
+              await user.createDeliveryAddress(deliveryAddress, {
+                transaction: t,
+              })
+            ).id
+          : addressId,
+      },
+      { transaction: t }
+    );
+
+    // const orderProducts = await order.addProducts(products, {
+    //   transaction: t,
+    //   through: {},
+    // });
+
+    for (let product of orderToBeSaved) {
+      await order.addProduct(product.productId, {
+        transaction: t,
+        through: {
+          ...product,
+        },
+      });
+
+      //deduct available stock from product!
+      const { quantity } = product;
+      const productInstance = products.find(
+        (productInstance) =>
+          Number(productInstance.id) === Number(product.productId)
+      );
+
+      await productInstance.decrement("quantity", {
+        by: quantity,
+        transaction: t,
+      });
+    }
+
+    await t.commit();
+    res.send(order);
+  } catch (err) {
+    await t.rollback();
+    throw { status: 400, ...err };
+  }
+});

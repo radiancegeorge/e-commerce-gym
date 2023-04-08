@@ -19,14 +19,19 @@ const products = (sequelize, dataTypes) => {
     price: {
       type: dataTypes.FLOAT,
       allowNull: false,
+      validate: {
+        min: 0,
+      },
     },
     stockAmount: {
       type: dataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
       validate: {
         isInt: {
           msg: "Must be a whole number",
         },
+        min: 0,
       },
     },
   });

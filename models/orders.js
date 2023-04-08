@@ -6,20 +6,25 @@ const { Sequelize, DataTypes } = require("sequelize");
  */
 const orders = (sequelize, dataType) => {
   const orders = sequelize.define("orders", {
+    orderId: {
+      allowNull: false,
+      type: dataType.UUID,
+      defaultValue: dataType.UUIDV4,
+    },
     status: {
       type: dataType.STRING,
       allowNull: false,
       defaultValue: "pending",
     },
-    quantity: {
-      type: dataType.INTEGER,
+    total: {
       allowNull: false,
-      defaultValue: 1,
+      defaultValue: 0,
+      type: dataType.DECIMAL(10, 2),
     },
   });
 
   orders.associate = (models) => {
-    orders.belongsToMany(models.products, { through: "orderProducts" });
+    orders.belongsToMany(models.products, { through: models.orderProducts });
     orders.belongsTo(models.users);
     orders.belongsTo(models.deliveryAddress);
   };

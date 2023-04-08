@@ -16,6 +16,9 @@ const coupons = (sequelize, dataType) => {
       type: dataType.FLOAT,
       allowNull: false,
       defaultValue: 0.0,
+      validate: {
+        max: 100,
+      },
     },
     expiryDate: {
       type: dataType.DATEONLY,

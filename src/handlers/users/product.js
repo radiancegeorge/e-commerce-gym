@@ -9,7 +9,6 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
   const { limit, page, categories, collections, colors, sizes, sudo } =
     req.query;
   const offset = (page - 1) * limit;
-  console.log(userId);
   const { count, rows: products } = await db.products.findAndCountAll({
     ...(!sudo && {
       where: {
@@ -91,6 +90,7 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
 });
 
 exports.getSingleProduct = expressAsyncHandler(async (req, res) => {
+  const userId = req.user?.id;
   const { id } = req.params;
   const product = await db.products.findOne({
     where: {
@@ -114,7 +114,16 @@ exports.getSingleProduct = expressAsyncHandler(async (req, res) => {
       {
         model: db.images,
       },
-    ],
+      userId && {
+        model: db.users,
+        // attributes: [],
+        where: {
+          id: userId,
+        },
+        through: "usersWishList",
+        required: false,
+      },
+    ].filter((data) => data),
   });
 
   res.send(product);
@@ -136,6 +145,9 @@ exports.getWishList = expressAsyncHandler(async (req, res) => {
       },
       {
         model: db.categories,
+      },
+      {
+        model: db.images,
       },
       {
         model: db.users,

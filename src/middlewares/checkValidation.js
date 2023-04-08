@@ -1,4 +1,4 @@
-const { validationResult } = require("express-validator");
+const { validationResult, matchedData } = require("express-validator");
 
 const checkValidation = async (req) => {
   const errors = validationResult(req);
@@ -6,6 +6,7 @@ const checkValidation = async (req) => {
   if (!errors.isEmpty()) {
     throw { status: 400, errors: errors.array() };
   }
+  return matchedData(req);
 };
 
 module.exports = checkValidation;
