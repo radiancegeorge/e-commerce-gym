@@ -65,6 +65,12 @@ exports.getProducts = expressAsyncHandler(async (req, res) => {
       },
       {
         model: db.coupons,
+        where: {
+          expiryDate: {
+            [Op.gt]: new Date(),
+          },
+        },
+        required: false,
       },
       userId && {
         model: db.users,
@@ -114,6 +120,15 @@ exports.getSingleProduct = expressAsyncHandler(async (req, res) => {
       {
         model: db.images,
       },
+      {
+        model: db.coupons,
+        where: {
+          expiryDate: {
+            [Op.gt]: new Date(),
+          },
+        },
+        required: false,
+      },
       userId && {
         model: db.users,
         // attributes: [],
@@ -142,6 +157,12 @@ exports.getWishList = expressAsyncHandler(async (req, res) => {
       },
       {
         model: db.coupons,
+        where: {
+          expiryDate: {
+            [Op.gt]: new Date(),
+          },
+        },
+        required: false,
       },
       {
         model: db.categories,
@@ -201,4 +222,39 @@ exports.removeFromList = expressAsyncHandler(async (req, res) => {
     await x.removeUser(id);
   }
   res.status(204).send();
+});
+
+exports.featuredProducts = expressAsyncHandler(async (req, res) => {
+  const { limit } = req.query;
+  const products = await db.products.findAll({
+    order: db.Sequelize.literal("rand()"),
+    include: [
+      {
+        model: db.sizes,
+      },
+      {
+        model: db.images,
+      },
+      {
+        model: db.colors,
+      },
+      {
+        model: db.collections,
+      },
+      {
+        model: db.categories,
+      },
+      {
+        model: db.coupons,
+        where: {
+          expiryDate: {
+            [Op.gt]: new Date(),
+          },
+        },
+        required: false,
+      },
+    ],
+    limit,
+  });
+  res.send(products);
 });
