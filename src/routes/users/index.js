@@ -1,4 +1,4 @@
-const { createOrder } = require("../../handlers/users/order");
+const { createOrder, getOrders } = require("../../handlers/users/order");
 const {
   getWishList,
   addToWishList,
@@ -8,6 +8,7 @@ const {
   getWishListValidation,
   productIdsValidations,
   ordersValidation,
+  getOrderValidations,
 } = require("./validations");
 
 const users = require("express").Router();
@@ -18,6 +19,9 @@ users
   .put(productIdsValidations, addToWishList)
   .delete(productIdsValidations, removeFromList);
 
-users.route("/order").post(ordersValidation, createOrder);
+users
+  .route("/order/:id?")
+  .post(ordersValidation, createOrder)
+  .get(getOrderValidations, getOrders);
 
 module.exports = users;

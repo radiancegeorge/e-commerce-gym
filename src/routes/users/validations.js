@@ -74,3 +74,8 @@ exports.ordersValidation = [
       return true;
     }),
 ];
+
+exports.getOrderValidations = [
+  query(["limit", "page"]).default(1).toInt().isInt(),
+  query(["userId", "email", "status"]).optional(),
+];

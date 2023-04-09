@@ -118,6 +118,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
             ).id
           : addressId,
         status: "confirmed",
+        userId: id,
       },
       { transaction: t }
     );
@@ -165,3 +166,71 @@ const processPayment = async ({ paymentId, amount, currency = "usd" }) => {
   });
   return charges;
 };
+
+exports.getOrders = expressAsyncHandler(async (req, res) => {
+  const isAdmin = req.admin;
+  const { limit, page, userId, email, status } = await checkValidation(req);
+  const offset = (page - 1) * limit;
+
+  const person =
+    isAdmin &&
+    (await db.users.findOne({
+      where: {
+        ...(userId && {
+          userId,
+        }),
+        ...(email && {
+          email,
+        }),
+      },
+    }));
+
+  const { count, rows: orders } = await db.orders.findAndCountAll({
+    where: {
+      ...(person &&
+        isAdmin && {
+          userId: person.id,
+        }),
+      ...(status && {
+        status,
+      }),
+      ...(!isAdmin && {
+        userId: req.user?.id,
+      }),
+    },
+    include: [
+      {
+        model: db.users,
+        attributes: {
+          exclude: "password",
+        },
+      },
+      {
+        model: db.products,
+        through: db.orderProducts,
+        include: [
+          {
+            model: db.images,
+          },
+          {
+            model: db.colors,
+          },
+          {
+            model: db.sizes,
+          },
+        ],
+      },
+    ],
+    limit,
+    offset,
+    order: [["id", "asc"]],
+  });
+
+  res.send({
+    results: orders,
+    page,
+    limit,
+    count,
+    totalPages: Math.ceil(count / limit),
+  });
+});

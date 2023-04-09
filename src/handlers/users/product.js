@@ -6,17 +6,32 @@ const { Op } = require("sequelize");
 exports.getProducts = expressAsyncHandler(async (req, res) => {
   await checkValidation(req);
   const userId = req.user?.id;
-  const { limit, page, categories, collections, colors, sizes, sudo } =
+  const { limit, page, categories, collections, colors, sizes, sudo, search } =
     req.query;
   const offset = (page - 1) * limit;
   const { count, rows: products } = await db.products.findAndCountAll({
-    ...(!sudo && {
-      where: {
+    where: {
+      ...(!sudo && {
         stockAmount: {
           [Op.gt]: 0,
         },
-      },
-    }),
+      }),
+      ...(search && {
+        [Op.or]: [
+          {
+            name: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+          {
+            description: {
+              [Op.like]: `%${search}%`,
+            },
+          },
+        ],
+      }),
+    },
+
     include: [
       {
         model: db.colors,
