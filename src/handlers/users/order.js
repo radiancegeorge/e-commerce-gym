@@ -2,6 +2,7 @@ const expressAsyncHandler = require("express-async-handler");
 const checkValidation = require("../../middlewares/checkValidation");
 const db = require("../../../models");
 const { Op } = require("sequelize");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.createAddress = expressAsyncHandler(async (req, res) => {
   const data = await checkValidation(req);
@@ -16,7 +17,7 @@ exports.createAddress = expressAsyncHandler(async (req, res) => {
 });
 
 exports.createOrder = expressAsyncHandler(async (req, res) => {
-  const { orders, deliveryAddress, addressId, couponId } =
+  const { orders, deliveryAddress, addressId, couponCode, paymentId, source } =
     await checkValidation(req);
   const { id } = req.user;
 
@@ -62,7 +63,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
     };
 
   //generate individual total product price and add to order object
-  const orderToBeSaved = Array(orders).map((order) => {
+  const orderToBeSaved = Array(...orders).map((order) => {
     const product = products.find(
       (product) => Number(order.productId) === product.dataValues.id
     );
@@ -78,14 +79,16 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
   });
 
   // generate order total amd add coupon if any provided
-  const { discount, id: coupon } = (await db.coupons.findOne({
-    where: {
-      id: couponId,
-      expiryDate: {
-        [Op.gt]: new Date(),
-      },
-    },
-  })) ?? { discount: 0 };
+  const { discount, id: coupon } = couponCode
+    ? await db.coupons.findOne({
+        where: {
+          code: couponCode,
+          expiryDate: {
+            [Op.gt]: new Date(),
+          },
+        },
+      })
+    : { discount: 0 };
 
   const totalPriceFromProducts = orderToBeSaved.reduce(
     ({ total: prevDataPrice }, { total: currentDataPrice }) => {
@@ -104,7 +107,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
     const order = await db.orders.create(
       {
         total,
-        ...(coupon && { couponId }),
+        ...(coupon && { couponId: coupon }),
         deliveryAddressId: !addressId
           ? (
               await user.createDeliveryAddress(deliveryAddress, {
@@ -112,6 +115,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
               })
             ).id
           : addressId,
+        status: "confirmed",
       },
       { transaction: t }
     );
@@ -136,16 +140,26 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
           Number(productInstance.id) === Number(product.productId)
       );
 
-      await productInstance.decrement("quantity", {
+      await productInstance.decrement("stockAmount", {
         by: quantity,
         transaction: t,
       });
     }
-
+    const charges = await processPayment({ paymentId, amount: total * 100 });
     await t.commit();
-    res.send(order);
+    res.send({ ...order.dataValues, charges });
   } catch (err) {
     await t.rollback();
     throw { status: 400, ...err };
   }
 });
+
+const processPayment = async ({ paymentId, amount, currency = "usd" }) => {
+  const charges = await stripe.paymentIntents.create({
+    payment_method: paymentId,
+    amount,
+    currency,
+    confirm: true,
+  });
+  return charges;
+};
