@@ -17,7 +17,7 @@ exports.createAddress = expressAsyncHandler(async (req, res) => {
 });
 
 exports.createOrder = expressAsyncHandler(async (req, res) => {
-  const { orders, deliveryAddress, addressId, couponCode, paymentId, source } =
+  const { orders, deliveryAddress, addressId, couponCode, paymentId } =
     await checkValidation(req);
   const { id } = req.user;
 
@@ -70,11 +70,13 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
 
     //check for coupons and compute price
     const percentage = product.coupon?.discount ?? 0;
+
     const price =
       Number(product.price) -
       (Number(percentage) / 100) * Number(product.price);
 
     const total = price * Number(order.quantity);
+
     return { ...order, total };
   });
 
@@ -94,7 +96,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
     ({ total: prevDataPrice }, { total: currentDataPrice }) => {
       return prevDataPrice + currentDataPrice;
     },
-    orderToBeSaved[0]
+    { total: 0 }
   );
 
   //apply discount if any
