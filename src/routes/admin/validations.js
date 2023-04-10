@@ -82,3 +82,5 @@ exports.createCategoriesValidation = [body("name").not().isEmpty()];
 exports.couponsProductValidation = [
   body("productIds").isArray().isLength({ min: 1 }),
 ];
+
+exports.toggleOrderValidation = [param("orderId").trim().notEmpty()];

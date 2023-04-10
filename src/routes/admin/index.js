@@ -49,7 +49,7 @@ const {
   deleteSizes,
   updateSizes,
 } = require("../../handlers/admin/sizes");
-const { getOrders } = require("../../handlers/users/order");
+const { getOrders, toggleOrder } = require("../../handlers/users/order");
 const upload = require("../../middlewares/imagesFilterUploads");
 const {
   ordersValidation,
@@ -76,6 +76,7 @@ const {
   productsCollectionValidation,
   productsSizeValidation,
   couponsProductValidation,
+  toggleOrderValidation,
 } = require("./validations");
 
 const admin = require("express").Router();
@@ -162,4 +163,5 @@ admin
   .put(productsIdValidation, productsCollectionValidation, addCollection);
 
 admin.route("/order").get(getOrderValidations, getOrders);
+admin.route("/order/:orderId/toggle").patch(toggleOrderValidation, toggleOrder);
 module.exports = admin;

@@ -235,3 +235,17 @@ exports.getOrders = expressAsyncHandler(async (req, res) => {
     totalPages: Math.ceil(count / limit),
   });
 });
+
+exports.toggleOrder = expressAsyncHandler(async (req, res) => {
+  const { orderId } = await checkValidation(req);
+  const order = await db.orders.findOne({
+    where: {
+      orderId,
+    },
+  });
+  if (!order) throw { status: 404, message: "order not found" };
+  order.status = order.status === "confirmed" ? "delivered" : "confirmed";
+  await order.save();
+
+  res.status(200).send(await db.orders.findOne({ where: { orderId } }));
+});
