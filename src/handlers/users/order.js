@@ -224,7 +224,7 @@ exports.getOrders = expressAsyncHandler(async (req, res) => {
     ],
     limit,
     offset,
-    order: [["id", "asc"]],
+    order: [["id", "desc"]],
   });
 
   res.send({
