@@ -49,7 +49,12 @@ const {
   deleteSizes,
   updateSizes,
 } = require("../../handlers/admin/sizes");
+const { getOrders } = require("../../handlers/users/order");
 const upload = require("../../middlewares/imagesFilterUploads");
+const {
+  ordersValidation,
+  getOrderValidations,
+} = require("../users/validations");
 const {
   collectionsCreationValidation,
   collectionUpdateValidation,
@@ -155,4 +160,6 @@ admin
   .route("/product/:id/collection")
   .delete(productsIdValidation, removeCollection)
   .put(productsIdValidation, productsCollectionValidation, addCollection);
+
+admin.route("/order").get(getOrderValidations, getOrders);
 module.exports = admin;

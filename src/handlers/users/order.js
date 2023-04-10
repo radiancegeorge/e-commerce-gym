@@ -174,6 +174,7 @@ exports.getOrders = expressAsyncHandler(async (req, res) => {
 
   const person =
     isAdmin &&
+    email | userId &&
     (await db.users.findOne({
       where: {
         ...(userId && {
@@ -184,7 +185,7 @@ exports.getOrders = expressAsyncHandler(async (req, res) => {
         }),
       },
     }));
-
+  console.log(person, userId, email);
   const { count, rows: orders } = await db.orders.findAndCountAll({
     where: {
       ...(person &&
