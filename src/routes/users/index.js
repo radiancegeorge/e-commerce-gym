@@ -1,3 +1,4 @@
+const { me } = require("../../handlers/users/auth");
 const { createOrder, getOrders } = require("../../handlers/users/order");
 const {
   getWishList,
@@ -24,4 +25,5 @@ users
   .post(ordersValidation, createOrder)
   .get(getOrderValidations, getOrders);
 
+users.route("/me").get(me);
 module.exports = users;

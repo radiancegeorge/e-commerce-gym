@@ -177,3 +177,17 @@ exports.loginUser = expressAsyncHandler(async (req, res) => {
 
   res.send({ token });
 });
+
+exports.me = expressAsyncHandler(async (req, res) => {
+  const { id } = req.user;
+  const user = await db.users.findOne({
+    where: {
+      id,
+    },
+    attributes: {
+      exclude: "password",
+    },
+  });
+
+  res.send(user);
+});
