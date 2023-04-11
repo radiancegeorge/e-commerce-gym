@@ -8,6 +8,7 @@ const {
   getProducts,
   getSingleProduct,
   featuredProducts,
+  getCollectionsRandomImages,
 } = require("../../handlers/users/product");
 const partialUserAuth = require("../../middlewares/partialUserAuth.middleware");
 const { allGetListValidation } = require("../admin/validations");
@@ -28,5 +29,7 @@ unAuth
   .route("/product/random")
   .get(partialUserAuth, randValidation, featuredProducts);
 unAuth.route("/product/:id").get(partialUserAuth, getSingleProduct);
+
+unAuth.route("/collections/random-images").get(getCollectionsRandomImages);
 
 module.exports = unAuth;

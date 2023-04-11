@@ -273,3 +273,26 @@ exports.featuredProducts = expressAsyncHandler(async (req, res) => {
   });
   res.send(products);
 });
+
+exports.getCollectionsRandomImages = expressAsyncHandler(async (req, res) => {
+  const collections = await db.collections.findAll();
+  const result = await Promise.all(
+    collections.map(async (collection) => {
+      //getting randomProducts
+      const product = await db.products.findOne({
+        where: {
+          collectionId: collection.id,
+        },
+        include: {
+          model: db.images,
+        },
+        order: db.sequelize.literal("RAND()"),
+      });
+      return {
+        ...collection.dataValues,
+        product,
+      };
+    })
+  );
+  res.send(result);
+});
