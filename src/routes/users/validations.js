@@ -79,3 +79,9 @@ exports.getOrderValidations = [
   query(["limit", "page"]).default(1).toInt().isInt(),
   query(["userId", "email", "status"]).optional(),
 ];
+
+exports.createAddressValidation = [
+  body(["addressLine1", "city", "state", "country", "zipCode"])
+    .trim()
+    .notEmpty(),
+];

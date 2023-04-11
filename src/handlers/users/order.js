@@ -249,3 +249,13 @@ exports.toggleOrder = expressAsyncHandler(async (req, res) => {
 
   res.status(200).send(await db.orders.findOne({ where: { orderId } }));
 });
+
+exports.getAddresses = expressAsyncHandler(async (req, res) => {
+  const address = await db.deliveryAddress.findAll({
+    where: {
+      userId: req.user.id,
+    },
+  });
+
+  res.send(address);
+});
