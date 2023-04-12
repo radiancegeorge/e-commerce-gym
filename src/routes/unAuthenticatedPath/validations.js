@@ -6,4 +6,8 @@ exports.getProductsValidation = [
   query("sudo").default(false).toBoolean(),
 ];
 
+exports.limitsValidation = [
+  query("limit").default(10).toInt().isInt(),
+  query("page").default(1).toInt().isInt(),
+];
 exports.randValidation = [query("limit").default(8).toInt()];

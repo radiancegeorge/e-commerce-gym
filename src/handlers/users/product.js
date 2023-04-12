@@ -275,7 +275,12 @@ exports.featuredProducts = expressAsyncHandler(async (req, res) => {
 });
 
 exports.getCollectionsRandomImages = expressAsyncHandler(async (req, res) => {
-  const collections = await db.collections.findAll();
+  const { limit, page } = await checkValidation(req);
+  const offset = (page - 1) * limit;
+  const { rows: collections, count } = await db.collections.findAndCountAll({
+    limit,
+    offset,
+  });
   const result = await Promise.all(
     collections.map(async (collection) => {
       //getting randomProducts
@@ -294,5 +299,10 @@ exports.getCollectionsRandomImages = expressAsyncHandler(async (req, res) => {
       };
     })
   );
-  res.send(result);
+  res.send({
+    results: result,
+    limit,
+    page,
+    totalPages: Math.ceil(count / limit),
+  });
 });
