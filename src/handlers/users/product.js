@@ -280,6 +280,7 @@ exports.getCollectionsRandomImages = expressAsyncHandler(async (req, res) => {
   const { rows: collections, count } = await db.collections.findAndCountAll({
     limit,
     offset,
+    order: [["id", "desc"]],
   });
   const result = await Promise.all(
     collections.map(async (collection) => {
