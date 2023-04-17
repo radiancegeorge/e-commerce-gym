@@ -24,6 +24,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
   const user = await db.users.findOne({
     where: { id },
   });
+
   /* orders dataType = {
         productId: number,
         quantity: number,
@@ -94,14 +95,15 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
 
   const totalPriceFromProducts = orderToBeSaved.reduce(
     ({ total: prevDataPrice }, { total: currentDataPrice }) => {
-      return prevDataPrice + currentDataPrice;
+      return { total: prevDataPrice + currentDataPrice };
     },
     { total: 0 }
   );
 
   //apply discount if any
   const total =
-    totalPriceFromProducts - (Number(discount) / 100) * totalPriceFromProducts;
+    totalPriceFromProducts.total -
+    (Number(discount) / 100) * totalPriceFromProducts.total;
 
   //create order
   const t = await db.sequelize.transaction();
@@ -122,7 +124,7 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
       },
       { transaction: t }
     );
-
+    // console.log(order);
     // const orderProducts = await order.addProducts(products, {
     //   transaction: t,
     //   through: {},
@@ -149,8 +151,8 @@ exports.createOrder = expressAsyncHandler(async (req, res) => {
       });
     }
     const charges = await processPayment({ paymentId, amount: total * 100 });
-    await t.commit();
     res.send({ ...order.dataValues, charges });
+    await t.commit();
   } catch (err) {
     await t.rollback();
     throw { status: 400, ...err };
@@ -185,7 +187,7 @@ exports.getOrders = expressAsyncHandler(async (req, res) => {
         }),
       },
     }));
-  console.log(person, userId, email);
+  // console.log(person, userId, email);
   const { count, rows: orders } = await db.orders.findAndCountAll({
     where: {
       ...(person &&
@@ -205,6 +207,9 @@ exports.getOrders = expressAsyncHandler(async (req, res) => {
         attributes: {
           exclude: "password",
         },
+      },
+      {
+        model: db.deliveryAddress,
       },
       {
         model: db.products,
